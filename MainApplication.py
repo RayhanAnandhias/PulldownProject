@@ -11,7 +11,7 @@ class MainApplication(tk.Frame):
 
     def initialize_user_interface(self):
         self.parent.geometry("500x500")
-        self.parent.title("[IP-2]181524028")
+        self.parent.title("[IP]181524028")
 
 
 if __name__ == "__main__":
