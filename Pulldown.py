@@ -6,6 +6,20 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
+class PopupWindow(object):
+    def __init__(self,master):
+        self.top=tk.Toplevel(master)
+        self.top.geometry("300x100")
+        self.top.title("Enter Kernel size (nxn)")
+        self.l=tk.Label(self.top,text="Enter n : ")
+        self.l.pack()
+        self.e=tk.Entry(self.top)
+        self.e.pack()
+        self.b=tk.Button(self.top,text='Ok',command=self.cleanup)
+        self.b.pack()
+    def cleanup(self):
+        self.value=self.e.get()
+        self.top.destroy()
 
 class Pulldown(tk.Frame):
     def __init__(self, parent):
@@ -13,12 +27,14 @@ class Pulldown(tk.Frame):
         self.panel = None
         self.parent = parent
         self.file_menu = None
+        self.noise_menu = None
         self.mode_menu = None
         self.img_pil_format = None
         self.img_path = None
         self.imgcv = None
         self.title_base = self.parent.title()
         self.initialize_pulldown()
+
 
     def initialize_pulldown(self):
         menubar = tk.Menu(self.parent)
@@ -32,9 +48,16 @@ class Pulldown(tk.Frame):
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Exit', command=self.exit)
 
+        self.noise_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label='Noise', menu=self.noise_menu)
+        self.noise_menu.add_command(label='Gaussian Noise', command=self.gaussian_noise, state="disabled")
+        self.noise_menu.add_command(label='Salt & Pepper Noise', command=self.snp_noise, state="disabled")
+        self.noise_menu.add_command(label='Poisson Noise', command=self.poisson_noise, state="disabled")
+        self.noise_menu.add_command(label='Speckle Noise', command=self.speckle_noise, state="disabled")
+
         # Adding mode color,grayscale
         self.mode_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label='Edit', menu=self.mode_menu)
+        menubar.add_cascade(label='Filter', menu=self.mode_menu)
 
         self.mode_menu.add_command(label='Original',
                                    command=lambda: self.open_image_bg(img_path=self.img_path),
@@ -42,10 +65,6 @@ class Pulldown(tk.Frame):
         self.mode_menu.add_command(label='Grayscale',
                                    command=lambda: self.open_image_bg(img_path=self.img_path, mode=cv.COLOR_BGR2GRAY),
                                    state="disabled")
-        self.mode_menu.add_command(label='Gaussian Noise', command=self.gaussian_noise, state="disabled")
-        self.mode_menu.add_command(label='Salt & Pepper Noise', command=self.snp_noise, state="disabled")
-        self.mode_menu.add_command(label='Poisson Noise', command=self.poisson_noise, state="disabled")
-        self.mode_menu.add_command(label='Speckle Noise', command=self.speckle_noise, state="disabled")
         self.mode_menu.add_command(label='2D Convolution', command=self.twoDConvolution, state="disabled")
         self.mode_menu.add_command(label='Averaging', command=self.averaging, state="disabled")
         self.mode_menu.add_command(label='Gaussian Filtering', command=self.gaussian, state="disabled")
@@ -55,6 +74,8 @@ class Pulldown(tk.Frame):
         self.mode_menu.add_command(label='Morphology', command=self.morphology, state="disabled")
         self.mode_menu.add_command(label='Laplacian Filtering', command=self.laplacian, state="disabled")
         self.mode_menu.add_command(label='Conservative Filtering', command=self.conservative, state="disabled")
+        self.mode_menu.add_command(label='Canny Edge Detection', command=self.canny_edge_detection, state="disabled")
+        self.mode_menu.add_command(label='Sobel Edge Detection', command=self.sobel_edge_detection, state="disabled")
 
         # display Menu
         self.parent.config(menu=menubar)
@@ -97,10 +118,10 @@ class Pulldown(tk.Frame):
             self.file_menu.entryconfig("Save", state="normal")
             self.mode_menu.entryconfig("Original", state="normal")
             self.mode_menu.entryconfig("Grayscale", state="normal")
-            self.mode_menu.entryconfig("Gaussian Noise", state="normal")
-            self.mode_menu.entryconfig("Salt & Pepper Noise", state="normal")
-            self.mode_menu.entryconfig("Poisson Noise", state="normal")
-            self.mode_menu.entryconfig("Speckle Noise", state="normal")
+            self.noise_menu.entryconfig("Gaussian Noise", state="normal")
+            self.noise_menu.entryconfig("Salt & Pepper Noise", state="normal")
+            self.noise_menu.entryconfig("Poisson Noise", state="normal")
+            self.noise_menu.entryconfig("Speckle Noise", state="normal")
             self.mode_menu.entryconfig("2D Convolution", state="normal")
             self.mode_menu.entryconfig("Averaging", state="normal")
             self.mode_menu.entryconfig("Gaussian Filtering", state="normal")
@@ -110,6 +131,8 @@ class Pulldown(tk.Frame):
             self.mode_menu.entryconfig("Morphology", state="normal")
             self.mode_menu.entryconfig("Laplacian Filtering", state="normal")
             self.mode_menu.entryconfig("Conservative Filtering", state="normal")
+            self.mode_menu.entryconfig("Canny Edge Detection", state="normal")
+            self.mode_menu.entryconfig("Sobel Edge Detection", state="normal")
 
             self.parent.title(self.title_base + " - " + self.img_path)
 
@@ -203,6 +226,11 @@ class Pulldown(tk.Frame):
             plt.xticks([]), plt.yticks([])
             plt.show()
 
+    def printtext(self):
+        global e
+        string = e.get()
+        print(string)
+
     def twoDConvolution(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
@@ -214,21 +242,30 @@ class Pulldown(tk.Frame):
     def averaging(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        dst = cv.blur(img_cv, (5, 5))
+        self.w = PopupWindow(self.parent)
+        self.parent.wait_window(self.w.top)
+        size = int(self.w.value)
+        dst = cv.blur(img_cv, (size, size))
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Averaging')
 
     def gaussian(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        dst = cv.GaussianBlur(img_cv, (5, 5), 0)
+        self.w = PopupWindow(self.parent)
+        self.parent.wait_window(self.w.top)
+        size = int(self.w.value)
+        dst = cv.GaussianBlur(img_cv, (size, size), 0)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Gaussian Filtering')
 
     def median(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        dst = cv.medianBlur(img_cv, 5)
+        self.w = PopupWindow(self.parent)
+        self.parent.wait_window(self.w.top)
+        size = int(self.w.value)
+        dst = cv.medianBlur(img_cv, size)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Median Filtering')
 
@@ -423,6 +460,23 @@ class Pulldown(tk.Frame):
         dst = self.addpoisson(img_cv)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Poisson Noise')
+
+    def canny_edge_detection(self):
+        img_cv = self.imgcv
+        img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
+        dst = cv.Canny(img_cv, 100, 200)
+        self.show_to_gui(dst)
+        self.plot_to_matplotlib(img_cv, dst, 'Canny Edge Detection', 2)
+
+    def sobel_edge_detection(self):
+        img_cv = self.imgcv
+        img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
+        img_gaussian = cv.GaussianBlur(img_cv, (3, 3), 0)
+        img_sobelx = cv.Sobel(img_gaussian, cv.CV_8U, 1, 0, ksize=5)
+        img_sobely = cv.Sobel(img_gaussian, cv.CV_8U, 0, 1, ksize=5)
+        img_sobel = img_sobelx + img_sobely
+        self.show_to_gui(img_sobel)
+        self.plot_to_matplotlib(img_cv, img_sobel, 'Sobel Edge Detection', 2)
 
     def exit(self):
         var = messagebox.askyesno("Exit", "Do you want to exit ?")
