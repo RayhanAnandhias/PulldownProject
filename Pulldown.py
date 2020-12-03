@@ -5,21 +5,8 @@ import tkinter.filedialog as filedialog
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
+from PopupWindow import PopupWindow
 
-class PopupWindow(object):
-    def __init__(self,master):
-        self.top=tk.Toplevel(master)
-        self.top.geometry("300x100")
-        self.top.title("Enter Kernel size (nxn)")
-        self.l=tk.Label(self.top,text="Enter n : ")
-        self.l.pack()
-        self.e=tk.Entry(self.top)
-        self.e.pack()
-        self.b=tk.Button(self.top,text='Ok',command=self.cleanup)
-        self.b.pack()
-    def cleanup(self):
-        self.value=self.e.get()
-        self.top.destroy()
 
 class Pulldown(tk.Frame):
     def __init__(self, parent):
@@ -242,9 +229,10 @@ class Pulldown(tk.Frame):
     def averaging(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        self.w = PopupWindow(self.parent)
-        self.parent.wait_window(self.w.top)
-        size = int(self.w.value)
+        w = PopupWindow(self.parent)
+        w.basic_popup()
+        self.parent.wait_window(w.top)
+        size = int(w.value)
         dst = cv.blur(img_cv, (size, size))
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Averaging')
@@ -252,9 +240,10 @@ class Pulldown(tk.Frame):
     def gaussian(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        self.w = PopupWindow(self.parent)
-        self.parent.wait_window(self.w.top)
-        size = int(self.w.value)
+        w = PopupWindow(self.parent)
+        w.basic_popup()
+        self.parent.wait_window(w.top)
+        size = int(w.value)
         dst = cv.GaussianBlur(img_cv, (size, size), 0)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Gaussian Filtering')
@@ -262,9 +251,10 @@ class Pulldown(tk.Frame):
     def median(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        self.w = PopupWindow(self.parent)
-        self.parent.wait_window(self.w.top)
-        size = int(self.w.value)
+        w = PopupWindow(self.parent)
+        w.basic_popup()
+        self.parent.wait_window(w.top)
+        size = int(w.value)
         dst = cv.medianBlur(img_cv, size)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Median Filtering')
