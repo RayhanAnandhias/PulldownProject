@@ -22,7 +22,6 @@ class Pulldown(tk.Frame):
         self.title_base = self.parent.title()
         self.initialize_pulldown()
 
-
     def initialize_pulldown(self):
         menubar = tk.Menu(self.parent)
 
@@ -58,11 +57,13 @@ class Pulldown(tk.Frame):
         self.mode_menu.add_command(label='Median Filtering', command=self.median, state="disabled")
         self.mode_menu.add_command(label='Bilateral Filtering', command=self.bilateral, state="disabled")
         self.mode_menu.add_command(label='Image Thresholding', command=self.maskImage, state="disabled")
+        self.mode_menu.add_command(label='Image Sharpening', command=self.image_sharpening, state="disabled")
         self.mode_menu.add_command(label='Morphology', command=self.morphology, state="disabled")
         self.mode_menu.add_command(label='Laplacian Filtering', command=self.laplacian, state="disabled")
         self.mode_menu.add_command(label='Conservative Filtering', command=self.conservative, state="disabled")
         self.mode_menu.add_command(label='Canny Edge Detection', command=self.canny_edge_detection, state="disabled")
         self.mode_menu.add_command(label='Sobel Edge Detection', command=self.sobel_edge_detection, state="disabled")
+        self.mode_menu.add_command(label='Prewitt Edge Detection', command=self.prewitt_edge_detection, state="disabled")
 
         # display Menu
         self.parent.config(menu=menubar)
@@ -115,11 +116,13 @@ class Pulldown(tk.Frame):
             self.mode_menu.entryconfig("Median Filtering", state="normal")
             self.mode_menu.entryconfig("Bilateral Filtering", state="normal")
             self.mode_menu.entryconfig("Image Thresholding", state="normal")
+            self.mode_menu.entryconfig("Image Sharpening", state="normal")
             self.mode_menu.entryconfig("Morphology", state="normal")
             self.mode_menu.entryconfig("Laplacian Filtering", state="normal")
             self.mode_menu.entryconfig("Conservative Filtering", state="normal")
             self.mode_menu.entryconfig("Canny Edge Detection", state="normal")
             self.mode_menu.entryconfig("Sobel Edge Detection", state="normal")
+            self.mode_menu.entryconfig("Prewitt Edge Detection", state="normal")
 
             self.parent.title(self.title_base + " - " + self.img_path)
 
@@ -213,15 +216,22 @@ class Pulldown(tk.Frame):
             plt.xticks([]), plt.yticks([])
             plt.show()
 
-    def printtext(self):
-        global e
-        string = e.get()
-        print(string)
-
     def twoDConvolution(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        kernel = np.ones((5, 5), np.float32) / 25
+
+        w = PopupWindow(self.parent)
+        w.basic_popup()
+        self.parent.wait_window(w.top)
+        rows, cols = (int(w.value),int(w.value))
+
+        w2 = PopupWindow(self.parent)
+        w2.input_matrix(rows, cols)
+        self.parent.wait_window(w2.top)
+
+        kernel = np.array(w2.kernel, dtype="float32")
+        print(kernel)
+        # kernel2 = np.ones((5, 5), np.float32) / 25
         dst = cv.filter2D(img_cv, -1, kernel)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, '2D Convolution')
@@ -262,15 +272,42 @@ class Pulldown(tk.Frame):
     def bilateral(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        dst = cv.bilateralFilter(img_cv, 9, 75, 75)
+        w = PopupWindow(self.parent)
+        w.input_bilateral()
+        self.parent.wait_window(w.top)
+        diameter, sigmaColor, sigmaSpace = (int(w.diameter), int(w.sigmaColor), int(w.sigmaSpace))
+        print(diameter, sigmaColor, sigmaSpace)
+        dst = cv.bilateralFilter(img_cv, diameter, sigmaColor, sigmaSpace)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Bilateral Filtering')
+
+    def image_sharpening(self):
+        img_cv = self.imgcv
+        img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
+        arr = [['-1', '-1', '-1'], ['-1', '9', '-1'], ['-1', '-1', '-1']]
+
+        w2 = PopupWindow(self.parent)
+        w2.input_matrix(3, 3, arr)
+        self.parent.wait_window(w2.top)
+
+        kernel = np.array(w2.kernel, dtype="float32")
+        # kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+        dst = cv.filter2D(img_cv, -1, kernel)
+        self.show_to_gui(dst)
+        self.plot_to_matplotlib(img_cv, dst, 'Image Sharpening')
 
     def maskImage(self):
         img_cv = self.imgcv
         img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
-        ret, th1 = cv.threshold(img_cv, 127, 255, cv.THRESH_BINARY)
+
+        w = PopupWindow(self.parent)
+        w.input_threshold()
+        self.parent.wait_window(w.top)
+        threshold, maxval = (int(w.threshold), int(w.maxval))
+        print(threshold, maxval)
+
+        ret, th1 = cv.threshold(img_cv, threshold, maxval, cv.THRESH_BINARY)
         self.show_to_gui(th1)
         self.plot_to_matplotlib(img_rgb, th1, 'Global Thresholding', 3)
 
@@ -454,19 +491,37 @@ class Pulldown(tk.Frame):
     def canny_edge_detection(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
-        dst = cv.Canny(img_cv, 100, 200)
+        dst = cv.Canny(img_cv, 50, 100)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Canny Edge Detection', 2)
 
     def sobel_edge_detection(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
+        scale = 1
+        delta = 0
+        ddepth = cv.CV_16S
         img_gaussian = cv.GaussianBlur(img_cv, (3, 3), 0)
-        img_sobelx = cv.Sobel(img_gaussian, cv.CV_8U, 1, 0, ksize=5)
-        img_sobely = cv.Sobel(img_gaussian, cv.CV_8U, 0, 1, ksize=5)
-        img_sobel = img_sobelx + img_sobely
+        img_sobelx = cv.Sobel(img_gaussian, ddepth, 1, 0, ksize=3, scale=scale, delta=delta,
+                              borderType=cv.BORDER_DEFAULT)
+        img_sobely = cv.Sobel(img_gaussian, ddepth, 0, 1, ksize=3, scale=scale, delta=delta,
+                              borderType=cv.BORDER_DEFAULT)
+        img_sobelx = cv.convertScaleAbs(img_sobelx)
+        img_sobely = cv.convertScaleAbs(img_sobely)
+        img_sobel = cv.addWeighted(img_sobelx, 0.5, img_sobely, 0.5, 0)
         self.show_to_gui(img_sobel)
         self.plot_to_matplotlib(img_cv, img_sobel, 'Sobel Edge Detection', 2)
+
+    def prewitt_edge_detection(self):
+        img_cv = self.imgcv
+        img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
+        kernelx = np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]])
+        kernely = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
+        img_prewittx = cv.filter2D(img_cv, -1, kernelx)
+        img_prewitty = cv.filter2D(img_cv, -1, kernely)
+        img_prewitt = img_prewittx + img_prewitty
+        self.show_to_gui(img_prewitt)
+        self.plot_to_matplotlib(img_cv, img_prewitt, 'Prewitt Edge Detection', 2)
 
     def exit(self):
         var = messagebox.askyesno("Exit", "Do you want to exit ?")
