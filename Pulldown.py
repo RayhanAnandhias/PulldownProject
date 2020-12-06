@@ -380,7 +380,11 @@ class Pulldown(tk.Frame):
     def conservative(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
-        dst = self.conservative_smoothing_gray(img_cv, 9)
+        w = PopupWindow(self.parent)
+        w.basic_popup()
+        self.parent.wait_window(w.top)
+        size = int(w.value)
+        dst = self.conservative_smoothing_gray(img_cv, size)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Conservative Filtering', 2)
 
@@ -405,7 +409,11 @@ class Pulldown(tk.Frame):
     def snp_noise(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        amount = 0.01
+        w = PopupWindow(self.parent)
+        w.input_salt()
+        self.parent.wait_window(w.top)
+        amount = float(w.value)
+        print(amount)
         dst = self.addsalt_pepper(img_cv, amount)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Salt and Pepper Noise')
@@ -426,9 +434,14 @@ class Pulldown(tk.Frame):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = img_cv / 255.0
-        mean = 0.
-        var = 0.05
-        dst = self.addgaussian(img_cv, mean, var)
+
+        w = PopupWindow(self.parent)
+        w.input_gauss_speckle()
+        self.parent.wait_window(w.top)
+        mean, variance = (float(w.mean), float(w.variance))
+        print(mean, variance)
+
+        dst = self.addgaussian(img_cv, mean, variance)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Gaussian Noise')
 
@@ -448,9 +461,14 @@ class Pulldown(tk.Frame):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = img_cv / 255.0
-        mean = 0.
-        var = 0.05
-        dst = self.addspeckle(img_cv, mean, var)
+
+        w = PopupWindow(self.parent)
+        w.input_gauss_speckle()
+        self.parent.wait_window(w.top)
+        mean, variance = (float(w.mean), float(w.variance))
+        print(mean, variance)
+
+        dst = self.addspeckle(img_cv, mean, variance)
         self.show_to_gui(dst)
         self.plot_to_matplotlib(img_cv, dst, 'Speckle Noise')
 

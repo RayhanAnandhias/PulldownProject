@@ -106,6 +106,37 @@ class PopupWindow(object):
         self.maxval = self.e2.get()
         self.top.destroy()
 
+    def input_salt(self):
+        self.top.geometry("300x100")
+        self.top.title("Enter Parameter Salt and Pepper Noise")
+        l = tk.Label(self.top, text="Enter amount : ")
+        l.pack()
+        self.e = tk.Entry(self.top)
+        self.e.pack()
+        b = tk.Button(self.top, text='Submit', command=self.cleanup)
+        b.pack()
+
+    def input_gauss_speckle(self):
+        self.top.geometry("300x100")
+        self.top.title("Enter Parameter Gaussian Noise")
+        l = tk.Label(self.top, text="Enter Mean : ")
+        l.pack()
+        self.e = tk.Entry(self.top)
+        self.e.insert(0, "0")
+        self.e.pack()
+        l1 = tk.Label(self.top, text="Enter Variance : ")
+        l1.pack()
+        self.e1 = tk.Entry(self.top)
+        self.e1.insert(0, "0.05")
+        self.e1.pack()
+        b = tk.Button(self.top, text='Submit', command=self.cleanup_gaussspeckle_noise)
+        b.pack()
+
+    def cleanup_gaussspeckle_noise(self):
+        self.mean=self.e.get()
+        self.variance = self.e1.get()
+        self.top.destroy()
+
     def cleanup(self):
         self.value=self.e.get()
         self.top.destroy()
