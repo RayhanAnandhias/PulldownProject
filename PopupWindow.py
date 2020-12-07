@@ -28,6 +28,7 @@ class PopupWindow(object):
         tk.Label(self.top, text="Enter matrix :").place(x=20, y=20)
         x2 = 0
         y2 = 0
+        x2_temp = 0
 
         for i in range(rows):
             # append an empty list to your two arrays
@@ -41,13 +42,13 @@ class PopupWindow(object):
                 else:
                     text_var[i].append(tk.StringVar())
                 entries[i].append(tk.Entry(self.top, textvariable=text_var[i][j], width=4))
-                entries[i][j].place(x=60 + x2, y=50 + y2)
+                entries[i][j].place(x=20 + x2, y=50 + y2)
                 x2 += 30
             y2 += 30
             x2 = 0
 
         b = tk.Button(self.top, text="Submit", width=15, command=lambda: self.get_mat(rows, cols, text_var))
-        b.place(x=160, y=200)
+        b.place(x=20, y=y2+50)
 
     def get_mat(self, rows, cols, text_var):
         try:
