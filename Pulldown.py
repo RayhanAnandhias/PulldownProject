@@ -219,97 +219,116 @@ class Pulldown(tk.Frame):
     def twoDConvolution(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
+        try:
+            w = PopupWindow(self.parent)
+            w.basic_popup()
+            self.parent.wait_window(w.top)
+            rows, cols = (int(w.value), int(w.value))
 
-        w = PopupWindow(self.parent)
-        w.basic_popup()
-        self.parent.wait_window(w.top)
-        rows, cols = (int(w.value),int(w.value))
+            w2 = PopupWindow(self.parent)
+            w2.input_matrix(rows, cols)
+            self.parent.wait_window(w2.top)
 
-        w2 = PopupWindow(self.parent)
-        w2.input_matrix(rows, cols)
-        self.parent.wait_window(w2.top)
-
-        kernel = np.array(w2.kernel, dtype="float32")
-        print(kernel)
-        # kernel2 = np.ones((5, 5), np.float32) / 25
-        dst = cv.filter2D(img_cv, -1, kernel)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, '2D Convolution')
+            kernel = np.array(w2.kernel, dtype="float32")
+            print(kernel)
+            # kernel2 = np.ones((5, 5), np.float32) / 25
+            dst = cv.filter2D(img_cv, -1, kernel)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, '2D Convolution')
+        except Exception as e:
+            # print(e)
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def averaging(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        w = PopupWindow(self.parent)
-        w.basic_popup()
-        self.parent.wait_window(w.top)
-        size = int(w.value)
-        dst = cv.blur(img_cv, (size, size))
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Averaging')
+        try:
+            w = PopupWindow(self.parent)
+            w.basic_popup()
+            self.parent.wait_window(w.top)
+            size = int(w.value)
+            dst = cv.blur(img_cv, (size, size))
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Averaging')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def gaussian(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        w = PopupWindow(self.parent)
-        w.basic_popup()
-        self.parent.wait_window(w.top)
-        size = int(w.value)
-        dst = cv.GaussianBlur(img_cv, (size, size), 0)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Gaussian Filtering')
+        try:
+            w = PopupWindow(self.parent)
+            w.basic_popup()
+            self.parent.wait_window(w.top)
+            size = int(w.value)
+            dst = cv.GaussianBlur(img_cv, (size, size), 0)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Gaussian Filtering')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def median(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        w = PopupWindow(self.parent)
-        w.basic_popup()
-        self.parent.wait_window(w.top)
-        size = int(w.value)
-        dst = cv.medianBlur(img_cv, size)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Median Filtering')
+        try:
+            w = PopupWindow(self.parent)
+            w.basic_popup()
+            self.parent.wait_window(w.top)
+            size = int(w.value)
+            dst = cv.medianBlur(img_cv, size)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Median Filtering')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def bilateral(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        w = PopupWindow(self.parent)
-        w.input_bilateral()
-        self.parent.wait_window(w.top)
-        diameter, sigmaColor, sigmaSpace = (int(w.diameter), int(w.sigmaColor), int(w.sigmaSpace))
-        print(diameter, sigmaColor, sigmaSpace)
-        dst = cv.bilateralFilter(img_cv, diameter, sigmaColor, sigmaSpace)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Bilateral Filtering')
+        try:
+            w = PopupWindow(self.parent)
+            w.input_bilateral()
+            self.parent.wait_window(w.top)
+            diameter, sigmaColor, sigmaSpace = (int(w.diameter), int(w.sigmaColor), int(w.sigmaSpace))
+            print(diameter, sigmaColor, sigmaSpace)
+            dst = cv.bilateralFilter(img_cv, diameter, sigmaColor, sigmaSpace)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Bilateral Filtering')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def image_sharpening(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         arr = [['-1', '-1', '-1'], ['-1', '9', '-1'], ['-1', '-1', '-1']]
+        try:
+            w2 = PopupWindow(self.parent)
+            w2.input_matrix(3, 3, arr)
+            self.parent.wait_window(w2.top)
 
-        w2 = PopupWindow(self.parent)
-        w2.input_matrix(3, 3, arr)
-        self.parent.wait_window(w2.top)
-
-        kernel = np.array(w2.kernel, dtype="float32")
-        # kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-        dst = cv.filter2D(img_cv, -1, kernel)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Image Sharpening')
+            kernel = np.array(w2.kernel, dtype="float32")
+            # kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+            dst = cv.filter2D(img_cv, -1, kernel)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Image Sharpening')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def maskImage(self):
         img_cv = self.imgcv
         img_rgb = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
+        try:
+            w = PopupWindow(self.parent)
+            w.input_threshold()
+            self.parent.wait_window(w.top)
+            threshold, maxval = (int(w.threshold), int(w.maxval))
+            print(threshold, maxval)
 
-        w = PopupWindow(self.parent)
-        w.input_threshold()
-        self.parent.wait_window(w.top)
-        threshold, maxval = (int(w.threshold), int(w.maxval))
-        print(threshold, maxval)
-
-        ret, th1 = cv.threshold(img_cv, threshold, maxval, cv.THRESH_BINARY)
-        self.show_to_gui(th1)
-        self.plot_to_matplotlib(img_rgb, th1, 'Global Thresholding', 3)
+            ret, th1 = cv.threshold(img_cv, threshold, maxval, cv.THRESH_BINARY)
+            self.show_to_gui(th1)
+            self.plot_to_matplotlib(img_rgb, th1, 'Global Thresholding', 3)
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def morphology(self):
         img_cv = self.imgcv
@@ -380,13 +399,16 @@ class Pulldown(tk.Frame):
     def conservative(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2GRAY)
-        w = PopupWindow(self.parent)
-        w.basic_popup()
-        self.parent.wait_window(w.top)
-        size = int(w.value)
-        dst = self.conservative_smoothing_gray(img_cv, size)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Conservative Filtering', 2)
+        try:
+            w = PopupWindow(self.parent)
+            w.basic_popup()
+            self.parent.wait_window(w.top)
+            size = int(w.value)
+            dst = self.conservative_smoothing_gray(img_cv, size)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Conservative Filtering', 2)
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def addsalt_pepper(self, image, amount):
         output = image.copy()
@@ -409,14 +431,17 @@ class Pulldown(tk.Frame):
     def snp_noise(self):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
-        w = PopupWindow(self.parent)
-        w.input_salt()
-        self.parent.wait_window(w.top)
-        amount = float(w.value)
-        print(amount)
-        dst = self.addsalt_pepper(img_cv, amount)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Salt and Pepper Noise')
+        try:
+            w = PopupWindow(self.parent)
+            w.input_salt()
+            self.parent.wait_window(w.top)
+            amount = float(w.value)
+            print(amount)
+            dst = self.addsalt_pepper(img_cv, amount)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Salt and Pepper Noise')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def addgaussian(self, img, mean, var):
         if img.min() < 0:
@@ -434,16 +459,18 @@ class Pulldown(tk.Frame):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = img_cv / 255.0
+        try:
+            w = PopupWindow(self.parent)
+            w.input_gauss_speckle()
+            self.parent.wait_window(w.top)
+            mean, variance = (float(w.mean), float(w.variance))
+            print(mean, variance)
 
-        w = PopupWindow(self.parent)
-        w.input_gauss_speckle()
-        self.parent.wait_window(w.top)
-        mean, variance = (float(w.mean), float(w.variance))
-        print(mean, variance)
-
-        dst = self.addgaussian(img_cv, mean, variance)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Gaussian Noise')
+            dst = self.addgaussian(img_cv, mean, variance)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Gaussian Noise')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def addspeckle(self, image, mean, var):
         if image.min() < 0:
@@ -461,16 +488,18 @@ class Pulldown(tk.Frame):
         img_cv = self.imgcv
         img_cv = cv.cvtColor(img_cv, cv.COLOR_BGR2RGB)
         img_cv = img_cv / 255.0
+        try:
+            w = PopupWindow(self.parent)
+            w.input_gauss_speckle()
+            self.parent.wait_window(w.top)
+            mean, variance = (float(w.mean), float(w.variance))
+            print(mean, variance)
 
-        w = PopupWindow(self.parent)
-        w.input_gauss_speckle()
-        self.parent.wait_window(w.top)
-        mean, variance = (float(w.mean), float(w.variance))
-        print(mean, variance)
-
-        dst = self.addspeckle(img_cv, mean, variance)
-        self.show_to_gui(dst)
-        self.plot_to_matplotlib(img_cv, dst, 'Speckle Noise')
+            dst = self.addspeckle(img_cv, mean, variance)
+            self.show_to_gui(dst)
+            self.plot_to_matplotlib(img_cv, dst, 'Speckle Noise')
+        except Exception as e:
+            messagebox.showerror("Error", "Invalid Parameter!")
 
     def addpoisson(self, image):
         if image.min() < 0:

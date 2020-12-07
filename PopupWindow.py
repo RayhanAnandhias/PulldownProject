@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import fractions
 
 
@@ -49,14 +50,18 @@ class PopupWindow(object):
         b.place(x=160, y=200)
 
     def get_mat(self, rows, cols, text_var):
-        matrix = []
-        for i in range(rows):
-            matrix.append([])
-            for j in range(cols):
-                matrix[i].append(float(fractions.Fraction(text_var[i][j].get())))
-        print(matrix)
-        self.kernel = matrix
-        self.top.destroy()
+        try:
+            matrix = []
+            for i in range(rows):
+                matrix.append([])
+                for j in range(cols):
+                    matrix[i].append(float(fractions.Fraction(text_var[i][j].get())))
+            print(matrix)
+            self.kernel = matrix
+            self.top.destroy()
+        except Exception as e :
+            # print(e)
+            self.top.destroy()
 
     def input_bilateral(self):
         self.top.geometry("400x300")
